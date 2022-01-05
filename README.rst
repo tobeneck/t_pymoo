@@ -7,146 +7,73 @@
    :target: https://www.apache.org/licenses/LICENSE-2.0
 
 
-.. |logo| image:: https://raw.githubusercontent.com/anyoptimization/pymoo/master/data/logo.png
-  :target: https://pymoo.org
-  :alt: pymoo
-
-
-.. |animation| image:: https://raw.githubusercontent.com/anyoptimization/pymoo/master/data/animation.gif
-  :target: https://pymoo.org
-  :alt: pymoo
-
-
-.. _Github: https://github.com/anyoptimization/pymoo
-.. _Documentation: https://www.pymoo.org/
-.. _Paper: https://ieeexplore.ieee.org/document/9078759
-
-
 
 
 |python| |license|
 
 
-|logo|
 
 
-
-Documentation_ / Paper_ / Installation_ / Usage_ / Citation_ / Contact_
-
-
-
-pymoo: Multi-objective Optimization in Python
+t_pymoo: The Traceable Evolutionary Algorithm in pymoo
 ====================================================================
 
-Our open-source framework pymoo offers state of the art single- and multi-objective algorithms and many more features
-related to multi-objective optimization such as visualization and decision making.
+This repository is a fork of the popular `pymoo <https://github.com/anyoptimization/pymoo>`_ framework, currently of the release 5.0. It implements heritage tracking capabilitys with the `traceable evolutionary algorithm (T-EA) <https://ci.ovgu.de/Publications/CEC_RBM_2020-p-870.html>`_. With this method, heritage information of the initial population can be tracked throughout the run of an EA.
+
+A list with all changes to the original framework can be found `here <Changes_to_pymoo.md>`_.
 
 
-.. _Installation:
-
-Installation
+How to Install
 ********************************************************************************
 
-First, make sure you have a Python 3 environment installed. We recommend miniconda3 or anaconda3.
-
-The official release is always available at PyPi:
+The installation of this framework is basically the same as manually installing pymoo, a guide of which can be found in its `official documentation <https://pymoo.org/installation.html>`_. Basically, just clone this repository and install it manually with pip.
 
 .. code:: bash
 
-    pip install -U pymoo
-
-
-For the current developer version:
-
-.. code:: bash
-
-    git clone https://github.com/anyoptimization/pymoo
+    git clone https://github.com/tobeneck/t_pymoo
     cd pymoo
     pip install .
 
 
-Since for speedup, some of the modules are also available compiled, you can double-check
-if the compilation worked. When executing the command, be sure not already being in the local pymoo
-directory because otherwise not the in site-packages installed version will be used.
-
-.. code:: bash
-
-    python -c "from pymoo.util.function_loader import is_compiled;print('Compiled Extensions: ', is_compiled())"
 
 
-.. _Usage:
-
-Usage
+How to Use
 ********************************************************************************
 
-We refer here to our documentation for all the details.
-However, for instance, executing NSGA2:
+The framework still works like pymoo, if you are unfamiliar with it look into its fantastic `documentation <https://pymoo.org/index.html>`_. The tracing information for the individuals are found in the variable T and can be retrieved similarly to the genome values X or fitness information F, as seen in the example below. Here the traceIDs influencing the first gene of the first individual of the final population are printed with their respective influence factor on the gene.
 
 .. code:: python
 
+   from pymoo.algorithms.moo.nsga2 import NSGA2
+   from pymoo.factory import get_problem, get_crossover, get_mutation, get_sampling
+   from pymoo.optimize import minimize
+   from pymoo.visualization.scatter import Scatter
 
-    from pymoo.algorithms.moo.nsga2 import NSGA2
-    from pymoo.factory import get_problem
-    from pymoo.optimize import minimize
-    from pymoo.visualization.scatter import Scatter
+   from pymoo.operators.sampling.rnd import FloatRandomSampling
 
-    problem = get_problem("zdt1")
+   from my_callback import MyCallback
 
-    algorithm = NSGA2(pop_size=100)
+   problem = get_problem("dtlz1")
 
-    res = minimize(problem,
-                   algorithm,
-                   ('n_gen', 200),
-                   seed=1,
-                   verbose=True)
+   algorithm = NSGA2(
+       pop_size=100,
+       sampling=get_sampling("real_random"),
+       crossover=get_crossover("real_sbx", prob=0.9, eta=20, tracing_activated=True),
+       mutation=get_mutation("real_pm", prob=1/problem.n_var, eta=20, tracing_activated=True)
+       )
 
-    plot = Scatter()
-    plot.add(problem.pareto_front(), plot_type="line", color="black", alpha=0.7)
-    plot.add(res.F, color="red")
-    plot.show()
+   res = minimize(problem,
+                  algorithm,
+                  ('n_gen', 100),
+                  seed=1)
 
-
-
-A representative run of NSGA2 looks as follows:
-
-|animation|
+   trace_list_ind1_gene1 = res.pop.get("T")[0, 0].get_all() #trace list of the first gene from the first individual of the population
+   for trace_tuple in trace_list_ind1_gene1:
+       print("traceID:", trace_tuple.traceID, "; influence factor:", trace_tuple.influenceFactor)
 
 
 
-.. _Citation:
+You can deactivate gene tracing, if you set "tracing_activated" flag in the crossover and mutation operator to False. By default they are set to True. Furthermore, for the mutation operator, you can also set the flag "accumulate_mutations", which by default is True. If you set this flag to False, each new mutation will generate a new traceID, enabeling to distinglish between different kinds of mutations. However, the runtime and memory usage of the algorithm might be significantly increased, as the trace lists of each gene will get bigger and bigger in each generation.
 
-Citation
-********************************************************************************
-
-If you have used our framework for research purposes, you can cite our publication by:
-
-| `J. Blank and K. Deb, pymoo: Multi-Objective Optimization in Python, in IEEE Access, vol. 8, pp. 89497-89509, 2020, doi: 10.1109/ACCESS.2020.2990567 <https://ieeexplore.ieee.org/document/9078759>`_
-|
-| BibTex:
-
-::
-
-    @ARTICLE{pymoo,
-        author={J. {Blank} and K. {Deb}},
-        journal={IEEE Access},
-        title={pymoo: Multi-Objective Optimization in Python},
-        year={2020},
-        volume={8},
-        number={},
-        pages={89497-89509},
-    }
-
-.. _Contact:
-
-Contact
-********************************************************************************
-
-Feel free to contact me if you have any questions:
-
-| `Julian Blank <http://julianblank.com>`_  (blankjul [at] egr.msu.edu)
-| Michigan State University
-| Computational Optimization and Innovation Laboratory (COIN)
-| East Lansing, MI 48824, USA
-
+Currently, only float and integer representations are supported in this framework. If you use other datatypes you will probably run into errors.
 
 

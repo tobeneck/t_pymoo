@@ -5,8 +5,8 @@ from pymoo.operators.repair.to_bound import set_to_bounds_if_outside_by_problem
 
 
 class PolynomialMutation(Mutation):
-    def __init__(self, eta, prob=None):
-        super().__init__()
+    def __init__(self, eta, prob=None, **kwargs):
+        super().__init__(**kwargs)
         self.eta = float(eta)
 
         if prob is not None:

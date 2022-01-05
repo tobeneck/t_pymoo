@@ -1,5 +1,30 @@
 import copy
 
+class TraceTuple:
+    def __init__(self, traceID, influenceFactor):
+        self.traceID = traceID
+        self.influenceFactor = influenceFactor
+        return
+
+class TraceList:
+    def __init__(self, traceList=None):
+        if traceList is None:
+            self.traceList = []
+        else:
+            self.traceList = traceList
+    
+    def len(self):
+        return len(self.traceList)
+
+    def get_all(self):
+        return self.traceList
+
+    def get(self, index):
+        return self.traceList[index]
+    
+    def append(self, traceTuple):
+        self.traceList.append(traceTuple)
+
 
 class Individual:
 
@@ -7,6 +32,7 @@ class Individual:
                  X=None, F=None, G=None,
                  dF=None, dG=None,
                  ddF=None, ddG=None,
+                 T=None, IsOff=True, #by default a new individual always is an offspring
                  CV=None, feasible=None,
                  **kwargs) -> None:
 
@@ -24,6 +50,12 @@ class Individual:
         # second order derivation
         self.ddF = ddF
         self.ddG = ddG
+
+        # the trace vectors
+        self.T = T
+
+        #the offspring flag
+        self.IsOff = IsOff
 
         # constraint violation and feasibility flag
         self.CV = CV

@@ -1,6 +1,10 @@
+import numpy as np
+
 from abc import abstractmethod
 
 from pymoo.core.population import Population
+
+from pymoo.core.individual import TraceTuple, TraceList
 
 
 class Sampling:
@@ -35,12 +39,28 @@ class Sampling:
             Samples points in a two dimensional array
 
         """
+
         val = self._do(problem, n_samples, **kwargs)
 
         if pop is None:
             return val
+        
+        #create the offspring flags
+        IsOff = np.zeros(len(val), dtype=bool) #in the initial population, all individuals are marked to be non offspring (or parents)
 
-        return Population.new("X", val)
+        #create the trace vectors
+        T = []
+        for indIndex in range(0, n_samples): #trace lists for all individuals
+            curr_T = []
+            for genomeIndex in range(0, problem.n_var): #trace list for each gene
+                curr_trace_list = np.array( [ TraceTuple(indIndex, 1.0) ], dtype=TraceTuple )
+                curr_T.append( TraceList(curr_trace_list) )
+            currT = np.array(curr_T, dtype=TraceList)
+            T.append(curr_T)
+
+        T = np.array(T, dtype=TraceTuple)
+
+        return Population.new("X", val, "IsOff", IsOff, "T", T)
 
     @abstractmethod
     def _do(self, problem, n_samples, **kwargs):

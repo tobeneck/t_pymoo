@@ -393,6 +393,10 @@ class Algorithm:
 
             self.history, self.callback = _hist, _callback
             self.history.append(obj)
+        
+        # reset the IsOff flags for the next generation
+        for individual in self.pop:
+            individual.IsOff = False
 
     # =========================================================================================================
     # TO BE OVERWRITTEN
