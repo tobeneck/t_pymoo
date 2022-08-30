@@ -1,4 +1,5 @@
 from pymoo.core.mutation import Mutation
+from pymoo.core.sampling import TracingTypes
 
 
 class NoMutation(Mutation):

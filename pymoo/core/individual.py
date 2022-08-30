@@ -33,6 +33,7 @@ class Individual:
                  dF=None, dG=None,
                  ddF=None, ddG=None,
                  T=None, IsOff=True, #by default a new individual always is an offspring
+                 ParentIDs = None, Birthday = None,
                  CV=None, feasible=None,
                  **kwargs) -> None:
 
@@ -51,7 +52,7 @@ class Individual:
         self.ddF = ddF
         self.ddG = ddG
 
-        # the trace vectors
+        # the trace information
         self.T = T
 
         #the offspring flag

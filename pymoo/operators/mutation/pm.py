@@ -8,6 +8,7 @@ class PolynomialMutation(Mutation):
     def __init__(self, eta, prob=None, **kwargs):
         super().__init__(**kwargs)
         self.eta = float(eta)
+        self.value_dependent_mutation = True
 
         if prob is not None:
             self.prob = float(prob)

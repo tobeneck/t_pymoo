@@ -5,8 +5,8 @@ from pymoo.core.mutation import Mutation
 
 class BinaryBitflipMutation(Mutation):
 
-    def __init__(self, prob=None):
-        super().__init__()
+    def __init__(self, prob=None, **kwargs):
+        super().__init__(**kwargs)
         self.prob = prob
 
     def _do(self, problem, X, **kwargs):
